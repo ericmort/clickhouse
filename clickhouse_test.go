@@ -7,9 +7,10 @@ import (
 	"testing"
 	"time"
 
+	"net"
+
 	"github.com/kshvakov/clickhouse"
 	"github.com/stretchr/testify/assert"
-	"net"
 )
 
 func Test_OpenConnectAndPing(t *testing.T) {
@@ -235,7 +236,7 @@ func Test_InsertBatch(t *testing.T) {
 		`
 		query = `SELECT COUNT(*) FROM clickhouse_test_insert_batch`
 	)
-	if connect, err := sql.Open("clickhouse", "tcp://127.0.0.1:9000?debug=true&block_size=11"); assert.NoError(t, err) && assert.NoError(t, connect.Ping()) {
+	if connect, err := sql.Open("clickhouse", "tcp://127.0.0.1:9000?debug=true&block_size=999"); assert.NoError(t, err) && assert.NoError(t, connect.Ping()) {
 		if _, err := connect.Exec("DROP TABLE IF EXISTS clickhouse_test_insert_batch"); assert.NoError(t, err) {
 			if _, err := connect.Exec(ddl); assert.NoError(t, err) {
 				if tx, err := connect.Begin(); assert.NoError(t, err) {

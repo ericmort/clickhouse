@@ -4,6 +4,8 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"io"
+	"log"
+	"os"
 	"strings"
 )
 
@@ -142,6 +144,7 @@ func (b *block) read(revision uint64, r io.Reader) error {
 }
 
 func (b *block) write(revision uint64, w io.Writer) error {
+	log := log.New(os.Stdout, "[clickhouse][block write] ", 0)
 	if err := writeUvarint(w, ClientDataPacket); err != nil {
 		return err
 	}
@@ -161,10 +164,12 @@ func (b *block) write(revision uint64, w io.Writer) error {
 	if err := writeUvarint(w, b.numRows); err != nil {
 		return err
 	}
+	log.Printf("table=%s, columns=%d, rows=%d, offsets=%d, buffers=%d", b.table, b.numColumns, b.numRows, len(b.offsetBuffers), len(b.buffers))
 	b.numRows = 0
 	b.offsets = make([]uint64, len(b.columnNames))
 	for i, column := range b.columnNames {
 		columnType := b.columnTypes[i]
+		log.Printf("column=%s, type=%s", column, columnType)
 		if err := writeString(w, column); err != nil {
 			return err
 		}
@@ -178,6 +183,7 @@ func (b *block) write(revision uint64, w io.Writer) error {
 			if err := b.buffers[i].writeTo(w); err != nil {
 				return err
 			}
+			log.Printf("buffers: offset=%d, buffers=%d", b.offsetBuffers[i].len(), b.buffers[i].len())
 		}
 	}
 	return nil

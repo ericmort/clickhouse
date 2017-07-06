@@ -37,6 +37,7 @@ func (stmt *stmt) execContext(ctx context.Context, args []driver.Value) (driver.
 			return nil, err
 		}
 		if (stmt.counter % stmt.ch.blockSize) == 0 {
+			stmt.ch.logf("[flush block] counter=%d, blocksize=%d, columns=%d, rows=%d", stmt.counter, stmt.ch.blockSize, stmt.ch.data.numColumns, stmt.ch.data.numRows)
 			if err := stmt.ch.data.write(stmt.ch.serverRevision, stmt.ch.conn); err != nil {
 				return nil, err
 			}
