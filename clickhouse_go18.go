@@ -4,6 +4,7 @@ package clickhouse
 
 import (
 	"context"
+	"reflect"
 	"database/sql/driver"
 )
 
@@ -36,4 +37,8 @@ func (stmt *stmt) ExecContext(ctx context.Context, args []driver.NamedValue) (dr
 		dargs[i] = nv.Value
 	}
 	return stmt.execContext(ctx, dargs)
+}
+
+func (rows *rows) ColumnTypeScanType(index int) reflect.Type {
+	return reflect.TypeOf(rows.columnInfo[index])
 }

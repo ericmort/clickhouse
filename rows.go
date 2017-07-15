@@ -6,14 +6,18 @@ import (
 )
 
 type rows struct {
-	index   int
-	columns []string
-	rows    [][]driver.Value
+	index       int
+	columns     []string
+	columnInfo  []interface{}
+	columnTypes []string
+	rows        [][]driver.Value
 }
 
 func (rows *rows) append(block *block) {
 	if len(rows.columns) == 0 && len(block.columnNames) != 0 {
 		rows.columns = block.columnNames
+		rows.columnInfo = block.columnInfo
+		rows.columnTypes = block.columnTypes
 	}
 	for rowNum := 0; rowNum < int(block.numRows); rowNum++ {
 		row := make([]driver.Value, 0, block.numColumns)
@@ -23,6 +27,7 @@ func (rows *rows) append(block *block) {
 		rows.rows = append(rows.rows, row)
 	}
 }
+
 
 func (rows *rows) Columns() []string {
 	return rows.columns
